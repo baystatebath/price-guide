@@ -178,7 +178,7 @@ const PRICE={
   gut_remodel:[
     {id:'gut_pkg',lbl:'FULL GUT-TO-STUD REMODEL — select to auto-include all required gut charges',price:0,qty:0,type:'gut_toggle'},
   ],
-  gut_remodel_title:'⚠ Full Gut-to-Stud Remodel',
+  gut_remodel_title:'Full Gut-to-Stud Remodel Mode',
 
   base:[
     {id:'conv',lbl:'Standard tub/shower conversion (BCI Elite — walls, 2 shelves, 1 grab bar, valve)',price:18000,qty:0,type:'toggle'},
@@ -403,12 +403,14 @@ function buildSections(){
     head.className='section-head';
     const isGutRequired = s==='gut_charges';
     const isGutSupp = s==='gut_supplemental';
-    const gutBadgeColor = isGutRequired ? 'background:#FCEBEB;color:#A32D2D;' : isGutSupp ? 'background:#E1F5EE;color:#0F6E56;' : '';
-    const titleColor = isGutRequired ? 'color:#A32D2D;' : isGutSupp ? 'color:#0F6E56;' : '';
-    head.innerHTML=`<span class="section-title" style="${titleColor}">${PRICE[s+'_title']}</span><span class="section-badge" id="badge-${s}" style="${gutBadgeColor}">$0</span>`;
+    const isGutSel = s==='gut_remodel';
+    const gutBadgeColor = isGutRequired ? 'background:#FCEBEB;color:#A32D2D;' : isGutSupp ? 'background:#E1F5EE;color:#0F6E56;' : isGutSel ? (gutMode?'background:#FCEBEB;color:#A32D2D;':'background:#F5F3F0;color:#888;') : '';
+    const titleColor = isGutRequired ? 'color:#A32D2D;' : isGutSupp ? 'color:#0F6E56;' : isGutSel ? (gutMode?'color:#A32D2D;font-weight:700;':'color:#555;') : '';
+    const badgeText = isGutSel ? (gutMode ? 'ON ⚠' : 'OFF') : '$0';
+    head.innerHTML=`<span class="section-title" style="${titleColor}">${PRICE[s+'_title']}</span><span class="section-badge" id="badge-${s}" style="${gutBadgeColor}">${isGutSel?badgeText:'$0'}</span>`;
     const body=document.createElement('div');
     body.className='section-body';
-    body.style.display=(s==='base'||((s==='gut_charges'||s==='gut_supplemental')&&gutMode))?'':'none';
+    body.style.display=(s==='base')?'':((s==='gut_charges'||s==='gut_supplemental')&&gutMode)?'':'none';
     head.onclick=()=>{body.style.display=body.style.display==='none'?'':'none';};
 
     items.forEach(it=>{
@@ -438,6 +440,7 @@ function buildSections(){
         const knob = row.querySelector('#gut-knob');
         const warn = row.querySelector('#gut-warning');
         if(gutMode){ chk.checked=true; slider.style.background='#A32D2D'; knob.style.transform='translateX(24px)'; warn.style.display='block'; }
+        else { chk.checked=false; slider.style.background='#ccc'; knob.style.transform='translateX(0)'; warn.style.display='none'; }
         chk.addEventListener('change', function(){
           slider.style.background = this.checked ? '#A32D2D' : '#ccc';
           knob.style.transform = this.checked ? 'translateX(24px)' : 'translateX(0)';
