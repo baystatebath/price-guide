@@ -491,6 +491,10 @@ function buildSections(){
       body.appendChild(note);
     }
 
+    // Hide entire card for gut sections when gut mode is off
+    if((s==='gut_charges'||s==='gut_supplemental')&&!gutMode){
+      return; // don't render these sections at all when gut mode is off
+    }
     card.appendChild(head);
     card.appendChild(body);
     c.appendChild(card);
