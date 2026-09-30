@@ -273,17 +273,27 @@ const PRICE={
   ],
   other_title:'Additional items',
 
-  // ── GUT-TO-STUD: REQUIRED CHARGES (auto-locked when gut mode on) ─────────
-  gut_charges:[
-    {id:'gut_demo_walls',lbl:'[REQUIRED] Demo all walls & ceiling to studs — removal & haul-away',price:2750,qty:0,type:'gut_required'},
-    {id:'gut_demo_floor',lbl:'[REQUIRED] Demo existing flooring — removal & haul-away',price:1200,qty:0,type:'gut_required'},
-    {id:'gut_drywall',lbl:'[REQUIRED] New drywall / board, mud & skim plaster — all walls & ceiling',price:2750,qty:0,type:'gut_required'},
-    {id:'gut_paint',lbl:'[REQUIRED] Paint — walls, trim & ceiling (full room)',price:2750,qty:0,type:'gut_required'},
-    {id:'gut_plumb_code',lbl:'[REQUIRED] Plumbing to code — new shut-off valves, supply lines, drain trap',price:1500,qty:0,type:'gut_required'},
-    {id:'gut_elec_code',lbl:'[REQUIRED] GFCI update & electrical code compliance',price:1500,qty:0,type:'gut_required'},
-    {id:'gut_baseboard',lbl:'[REQUIRED] New baseboard & trim throughout',price:750,qty:0,type:'gut_required'},
+  // ── MISCELLANEOUS / SPECIAL NOTES ────────────────────────────────────────
+  misc:[
+    {id:'misc1',lbl:'Miscellaneous item / special work (describe in notes)',price:0,qty:0,type:'custom'},
+    {id:'misc2',lbl:'Miscellaneous item / special work (describe in notes)',price:0,qty:0,type:'custom'},
+    {id:'misc3',lbl:'Miscellaneous item / special work (describe in notes)',price:0,qty:0,type:'custom'},
+    {id:'disc1',lbl:'Special discount / promotional allowance (enter as negative — e.g. -500)',price:0,qty:0,type:'custom'},
+    {id:'disc2',lbl:'Special discount / promotional allowance (enter as negative — e.g. -500)',price:0,qty:0,type:'custom'},
   ],
-  gut_charges_title:'⛔ Required Gut Charges (locked)',
+  misc_title:'Miscellaneous & Special Notes',
+
+  // ── GUT-TO-STUD: STANDARD GUT CHARGES (auto-toggled ON, included in total) ─
+  gut_charges:[
+    {id:'gut_demo_walls',lbl:'Demo all walls & ceiling to studs — removal & haul-away',price:2750,qty:0,type:'gut_optional'},
+    {id:'gut_demo_floor',lbl:'Demo existing flooring — removal & haul-away',price:1200,qty:0,type:'gut_optional'},
+    {id:'gut_drywall',lbl:'New drywall / board, mud & skim plaster — all walls & ceiling',price:2750,qty:0,type:'gut_optional'},
+    {id:'gut_paint',lbl:'Paint — walls, trim & ceiling (full room)',price:2750,qty:0,type:'gut_optional'},
+    {id:'gut_plumb_code',lbl:'Plumbing to code — new shut-off valves, supply lines, drain trap',price:1500,qty:0,type:'gut_optional'},
+    {id:'gut_elec_code',lbl:'GFCI update & electrical code compliance',price:1500,qty:0,type:'gut_optional'},
+    {id:'gut_baseboard',lbl:'New baseboard & trim throughout',price:750,qty:0,type:'gut_optional'},
+  ],
+  gut_charges_title:'✓ Standard Gut Charges (included in total)',
 
   // ── GUT-TO-STUD: SUPPLEMENTAL ITEMS (optional, shown only in gut mode) ───
   gut_supplemental:[
@@ -338,9 +348,9 @@ function toggleGutMode(on){
   updateStickyTotal();
 }
 
-const SECTIONS=['gut_remodel','base','walls','doors','seats','plumbing','finish','access','vanity','other','gut_charges','gut_supplemental'];
-const CUSTOM_IDS=['bertch','bertch_filler','bertch_toekick','bertch_linen','bertch_mirror','bertch_extras','gs_vanity_mat','gs_countertop_mat'];
-let custName='',custAddr='',repName='',jobDate='';
+const SECTIONS=['gut_remodel','base','walls','doors','seats','plumbing','finish','access','vanity','other','gut_charges','gut_supplemental','misc'];
+const CUSTOM_IDS=['bertch','bertch_filler','bertch_toekick','bertch_linen','bertch_mirror','bertch_extras','gs_vanity_mat','gs_countertop_mat','misc1','misc2','misc3','disc1','disc2'];
+let custName='',custAddr='',repName='',jobDate='',jobNotes='';
 let customPrices={};
 CUSTOM_IDS.forEach(id=>customPrices[id]=0);
 
@@ -391,6 +401,7 @@ function buildSections(){
       <input placeholder="Designer / rep name" style="padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;" oninput="repName=this.value">
       <input placeholder="Job address" style="padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;grid-column:1/-1;" oninput="custAddr=this.value">
       <input type="date" style="padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;" oninput="jobDate=this.value">
+      <textarea id="job-notes" placeholder="Special notes / conditions (shown on customer presentation)" rows="2" style="padding:8px;border:1px solid #ddd;border-radius:8px;font-size:13px;width:100%;grid-column:1/-1;resize:vertical;box-sizing:border-box;" oninput="jobNotes=this.value"></textarea>
     </div>
   `;
   c.appendChild(info);
@@ -401,11 +412,12 @@ function buildSections(){
     card.className='section-card';
     const head=document.createElement('div');
     head.className='section-head';
-    const isGutRequired = s==='gut_charges';
+    const isGutCharges = s==='gut_charges';
     const isGutSupp = s==='gut_supplemental';
     const isGutSel = s==='gut_remodel';
-    const gutBadgeColor = isGutRequired ? 'background:#FCEBEB;color:#A32D2D;' : isGutSupp ? 'background:#E1F5EE;color:#0F6E56;' : isGutSel ? (gutMode?'background:#FCEBEB;color:#A32D2D;':'background:#F5F3F0;color:#888;') : '';
-    const titleColor = isGutRequired ? 'color:#A32D2D;' : isGutSupp ? 'color:#0F6E56;' : isGutSel ? (gutMode?'color:#A32D2D;font-weight:700;':'color:#555;') : '';
+    const isMisc = s==='misc';
+    const gutBadgeColor = isGutCharges ? 'background:#E1F5EE;color:#0F6E56;' : isGutSupp ? 'background:#E1F5EE;color:#0F6E56;' : isGutSel ? (gutMode?'background:#FCEBEB;color:#A32D2D;':'background:#F5F3F0;color:#888;') : isMisc ? 'background:#FAEEDA;color:#BA7517;' : '';
+    const titleColor = isGutCharges ? 'color:#0A2540;font-weight:600;' : isGutSupp ? 'color:#0F6E56;' : isGutSel ? (gutMode?'color:#A32D2D;font-weight:700;':'color:#555;') : isMisc ? 'color:#BA7517;font-weight:600;' : '';
     const badgeText = isGutSel ? (gutMode ? 'ON ⚠' : 'OFF') : '$0';
     head.innerHTML=`<span class="section-title" style="${titleColor}">${PRICE[s+'_title']}</span><span class="section-badge" id="badge-${s}" style="${gutBadgeColor}">${isGutSel?badgeText:'$0'}</span>`;
     const body=document.createElement('div');
@@ -447,17 +459,27 @@ function buildSections(){
           warn.style.display = this.checked ? 'block' : 'none';
         });
       } else if(it.type==='gut_required'){
-        row.style.cssText='display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #f5f3ef;gap:8px;';
-        if(!gutMode){ row.style.display='none'; return; }
-        row.innerHTML=`
-          <span style="font-size:12px;flex:1;color:#A32D2D;font-weight:600;">${it.lbl}</span>
-          <span style="font-size:12px;font-weight:700;color:#A32D2D;min-width:70px;text-align:right;">${fmt(it.price)}</span>
-          <span style="font-size:11px;background:#FCEBEB;color:#A32D2D;padding:2px 8px;border-radius:10px;font-weight:600;">REQUIRED</span>`;
-      } else if(it.type==='gut_optional'){
-        // Optional supplemental — toggle, only shown in gut mode
         if(!gutMode){ return; }
-        row.className='toggle-item';
-        row.innerHTML=`<span class="toggle-lbl" style="color:#0A2540;">${it.lbl}</span><span class="item-price">${fmt(it.price)}</span><label class="toggle"><input type="checkbox" id="chk-${it.id}" ${it.qty?'checked':''} onchange="toggleItem('${it.id}','${s}')"><span class="slider-sw"></span></label>`;
+        row.className='line-item';
+        row.innerHTML=`
+          <span class="item-label">${it.lbl}</span>
+          <span class="item-price">${fmt(it.price)} ea</span>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty('${it.id}','${s}',-1)">−</button>
+            <span class="qty-num" id="qty-${it.id}">${it.qty}</span>
+            <button class="qty-btn" onclick="changeQty('${it.id}','${s}',1)">+</button>
+          </div>`;
+      } else if(it.type==='gut_optional'){
+        if(!gutMode){ return; }
+        row.className='line-item';
+        row.innerHTML=`
+          <span class="item-label" style="color:#0A2540;">${it.lbl}</span>
+          <span class="item-price">${fmt(it.price)} ea</span>
+          <div class="qty-ctrl">
+            <button class="qty-btn" onclick="changeQty('${it.id}','${s}',-1)">−</button>
+            <span class="qty-num" id="qty-${it.id}">${it.qty}</span>
+            <button class="qty-btn" onclick="changeQty('${it.id}','${s}',1)">+</button>
+          </div>`;
       } else if(it.type==='gut_qty'){
         // Per-unit qty item for gut supplemental
         if(!gutMode){ return; }
@@ -470,10 +492,17 @@ function buildSections(){
         const cval = customPrices[it.id]||0;
         row.innerHTML=`<span class="custom-lbl" style="color:#0A2540;">${it.lbl}</span><input type="number" placeholder="$ price" class="custom-inp" id="custom-${it.id}" value="${cval||''}" oninput="setCustom('${it.id}','${s}',this.value)"><label class="toggle" style="margin-left:6px;"><input type="checkbox" id="chk-${it.id}" ${it.qty?'checked':''} onchange="toggleItem('${it.id}','${s}')"><span class="slider-sw"></span></label>`;
       } else if(it.type==='toggle'){
-        row.className='toggle-item';
+        // Toggle items now support quantity — 0=off, 1=included, 2+=multiples
+        row.className='line-item';
         const locked = gutMode && it.gutRequired;
-        const checked = it.qty > 0;
-        row.innerHTML=`<span class="toggle-lbl" style="${locked?'color:#A32D2D;font-weight:600;':''}">${it.lbl}${locked?' [REQUIRED]':''}</span><span class="item-price">${fmt(it.price)}</span><label class="toggle" style="${locked?'opacity:0.4;pointer-events:none;':''}"><input type="checkbox" id="chk-${it.id}" ${checked?'checked':''} onchange="toggleItem('${it.id}','${s}')"><span class="slider-sw" style="${locked?'background:#A32D2D;':''}"></span></label>`;
+        row.innerHTML=`
+          <span class="item-label" style="${locked?'color:#A32D2D;font-weight:600;':''}">${it.lbl}${locked?' [REQUIRED]':''}</span>
+          <span class="item-price">${fmt(it.price)} ea</span>
+          <div class="qty-ctrl">
+            <button class="qty-btn" style="${locked?'opacity:0.4;pointer-events:none;':''}" onclick="changeQty('${it.id}','${s}',-1)">−</button>
+            <span class="qty-num" id="qty-${it.id}">${it.qty}</span>
+            <button class="qty-btn" style="${locked?'opacity:0.4;pointer-events:none;':''}" onclick="changeQty('${it.id}','${s}',1)">+</button>
+          </div>`;
       } else if(it.type==='qty'){
         row.className='line-item';
         row.innerHTML=`<span class="item-label">${it.lbl}</span><span class="item-price">${fmt(it.price)} ea</span><div class="qty-ctrl"><button class="qty-btn" onclick="changeQty('${it.id}','${s}',-1)">−</button><span class="qty-num" id="qty-${it.id}">${it.qty}</span><button class="qty-btn" onclick="changeQty('${it.id}','${s}',1)">+</button></div>`;
@@ -579,6 +608,7 @@ function buildPresentation(){
             <option>Check</option><option>Credit card</option><option>Finance</option>
           </select>
         </div>
+        ${jobNotes?`<div style="background:#f8f7f4;border-radius:8px;padding:12px 14px;font-size:13px;color:#555;margin-bottom:14px;"><strong style="color:#0A2540;">Notes:</strong> ${jobNotes}</div>`:''}
         <div class="pres-fine">Bay State Bath &nbsp;·&nbsp; HIC #193023<br>Designer: ${repName||'[Rep name]'} &nbsp;·&nbsp; ${today}</div>
         <div class="pres-sign">
           <div><div class="sign-line"></div><div class="sign-label">Customer signature</div></div>
@@ -596,7 +626,7 @@ function updateDep(sp){
 function resetAll(){
   allItems().forEach(it=>it.qty=0);
   CUSTOM_IDS.forEach(id=>customPrices[id]=0);
-  custName='';custAddr='';repName='';jobDate='';
+  custName='';custAddr='';repName='';jobDate='';jobNotes='';
   gutMode=false;
   buildSections();
   showTab('build',document.querySelectorAll('.tab')[0]);
